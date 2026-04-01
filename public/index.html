@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Athlete Load & Injury Risk Tracking System</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap");
+
+      :root {
+        --ink: #122433;
+        --muted: #567087;
+        --surface: #ffffff;
+        --line: #d4e1ea;
+        --accent: #0f766e;
+        --accent-dark: #0c5a54;
+        --danger: #9f1d1d;
+        --success: #0f7248;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Manrope", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 14% 8%, #d9f6ee 0%, transparent 28%),
+          radial-gradient(circle at 88% 2%, #f8e8d8 0%, transparent 25%),
+          linear-gradient(135deg, #eef4f8 0%, #f6fbff 40%, #edf6f5 100%);
+      }
+
+      .container {
+        max-width: 1360px;
+        margin: 22px auto;
+        padding: 0 16px 28px;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(18, 36, 51, 0.08);
+      }
+
+      .hero {
+        padding: 18px;
+        margin-bottom: 12px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(1.45rem, 1.95vw, 2.1rem);
+      }
+
+      .hero p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        max-width: 1000px;
+      }
+
+      .auth {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .auth-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1.2fr auto;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .auth-meta {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .status {
+        margin: 0 0 12px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+      }
+
+      .status.info {
+        background: #e8f7f5;
+        border-color: #bde7de;
+        color: #11574e;
+      }
+
+      .status.success {
+        background: #e9f9f0;
+        border-color: #bdeacf;
+        color: var(--success);
+      }
+
+      .status.error {
+        background: #fdecec;
+        border-color: #f5c0c0;
+        color: var(--danger);
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .kpi {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      .kpi .label {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .kpi strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 1.4rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.95fr;
+        gap: 12px;
+      }
+
+      .section {
+        padding: 14px;
+      }
+
+      .section h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .hint {
+        margin: 6px 0 12px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 8px;
+        align-items: end;
+        margin-bottom: 10px;
+      }
+
+      input,
+      select,
+      button,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font: inherit;
+        padding: 9px 10px;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid #9bded3;
+        border-color: #85d1c4;
+      }
+
+      button {
+        cursor: pointer;
+        border: 0;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .btn-light {
+        background: #213447;
+      }
+
+      .btn-light:hover {
+        background: #172737;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .table-wrap-spaced {
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 8px 9px;
+        text-align: left;
+        font-size: 0.88rem;
+      }
+
+      th {
+        background: #f1f8fb;
+      }
+
+      tr.active-row {
+        background: #e8f6f2;
+      }
+
+      .stack {
+        display: grid;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .sub-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+        background: #fcfefe;
+      }
+
+      .sub-card h3 {
+        margin: 0 0 8px;
+        font-size: 0.98rem;
+      }
+
+      .meta-list {
+        margin: 0;
+        padding-left: 16px;
+      }
+
+      .meta-list li {
+        margin-bottom: 5px;
+      }
+
+      .bar-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 88px 1fr 52px;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.82rem;
+      }
+
+      .bar-track {
+        height: 9px;
+        border-radius: 999px;
+        background: #e3edf2;
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #149085, #0b6f67);
+      }
+
+      .risk-chip {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .risk-low {
+        background: #daf9e8;
+        color: #0d6f42;
+      }
+
+      .risk-moderate {
+        background: #ffeccf;
+        color: #95520a;
+      }
+
+      .risk-high {
+        background: #fee2e2;
+        color: #9a1d1d;
+      }
+
+      .forms {
+        display: grid;
+        gap: 10px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .form-grid-full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+      }
+
+      .timeline {
+        margin-top: 12px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 1020px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .filters {
+          grid-template-columns: 1fr;
+        }
+
+        .auth-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="panel hero">
+        <h1>Athlete Load & Injury Risk Tracking System</h1>
+        <p>
+          A unified system for athlete profiles, injury history, recovery
+          progression, long-term workload tracking, and clear linkage between
+          injuries and physiotherapy interventions.
+        </p>
+      </header>
+
+      <section class="panel auth">
+        <div id="auth_logged_out">
+          <div class="auth-grid">
+            <div>
+              <label for="login_username">Username</label>
+              <input id="login_username" placeholder="admin" />
+            </div>
+            <div>
+              <label for="login_password">Password</label>
+              <input
+                id="login_password"
+                type="password"
+                placeholder="Enter password"
+              />
+            </div>
+            <div>
+              <button id="login_btn">Login</button>
+            </div>
+          </div>
+          <p class="auth-meta"></p>
+        </div>
+
+        <div id="auth_logged_in" class="hidden">
+          <div class="auth-grid">
+            <div>
+              <label>Signed in user</label>
+              <div id="auth_user" class="auth-meta"></div>
+            </div>
+            <div>
+              <label>Role</label>
+              <div id="auth_role" class="auth-meta"></div>
+            </div>
+            <div>
+              <button id="logout_btn" class="btn-light">Logout</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="status" class="status info">Please login to continue.</div>
+
+      <main id="app_shell" class="hidden">
+        <section class="kpis" id="kpis"></section>
+
+        <div class="grid">
+          <section class="panel section">
+            <h2>Athlete Command Center</h2>
+            <p class="hint">
+              Search athletes, open a profile, and monitor full
+              health-performance continuity.
+            </p>
+
+            <div class="filters">
+              <div>
+                <label for="search">Search athlete or sport</label>
+                <input id="search" placeholder="Type name or sport" />
+              </div>
+              <div>
+                <label for="sport_filter">Sport</label>
+                <select id="sport_filter">
+                  <option value="">All</option>
+                </select>
+              </div>
+              <div>
+                <label for="gender_filter">Gender</label>
+                <select id="gender_filter">
+                  <option value="">All</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <button id="refresh_btn" class="btn-light">Refresh</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Sport</th>
+                    <th>Age</th>
+                  </tr>
+                </thead>
+                <tbody id="athlete_rows"></tbody>
+              </table>
+            </div>
+
+            <div class="stack">
+              <div class="sub-card">
+                <h3>Selected Athlete Snapshot</h3>
+                <div id="athlete_meta" class="muted">
+                  Select an athlete from the table to inspect complete records.
+                </div>
+              </div>
+
+              <div class="sub-card">
+                <h3>Workload Trend (Last 60 Days)</h3>
+                <div id="workload_bars" class="bar-list muted">
+                  No athlete selected.
+                </div>
+              </div>
+
+              <div class="sub-card">
+                <h3>Injury to Physiotherapy Linkage</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Injury</th>
+                        <th>Date</th>
+                        <th>Severity</th>
+                        <th>Physio Sessions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="care_link_rows"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="sub-card">
+                <h3>Recovery and Risk Monitor</h3>
+                <div id="risk_chip" class="risk-chip risk-low">
+                  No risk data
+                </div>
+                <div id="risk_meta" class="muted">
+                  Select athlete to calculate risk.
+                </div>
+                <div class="table-wrap table-wrap-spaced">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Fatigue</th>
+                        <th>Soreness</th>
+                        <th>Sleep</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recovery_rows"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel section">
+            <h2>Structured Data Capture</h2>
+            <p class="hint">
+              Capture records through standardized forms to avoid inconsistency.
+            </p>
+
+            <div class="forms">
+              <form class="sub-card role-admin" id="athlete_form">
+                <h3>Create Athlete Record (Admin)</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="a_name">Name</label>
+                    <input id="a_name" required />
+                  </div>
+                  <div>
+                    <label for="a_sport">Sport</label>
+                    <input id="a_sport" required />
+                  </div>
+                  <div>
+                    <label for="a_dob">DOB</label>
+                    <input id="a_dob" type="date" required />
+                  </div>
+                  <div>
+                    <label for="a_enroll">Enrollment</label>
+                    <input id="a_enroll" type="date" required />
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="a_gender">Gender</label>
+                    <select id="a_gender" required>
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit">Save Athlete</button>
+              </form>
+
+              <form class="sub-card role-admin" id="coach_form">
+                <h3>Create Coach Record (Admin)</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="c_name">Coach Name</label>
+                    <input id="c_name" required />
+                  </div>
+                  <div>
+                    <label for="c_sport">Sport</label>
+                    <input id="c_sport" required />
+                  </div>
+                  <div>
+                    <label for="c_phone">Phone</label>
+                    <input id="c_phone" />
+                  </div>
+                  <div>
+                    <label for="c_email">Email</label>
+                    <input id="c_email" type="email" />
+                  </div>
+                </div>
+                <button type="submit">Save Coach</button>
+              </form>
+
+              <form class="sub-card role-admin role-coach" id="assign_form">
+                <h3>Assign Coach to Athlete</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="ac_athlete">Athlete</label>
+                    <select id="ac_athlete" required></select>
+                  </div>
+                  <div>
+                    <label for="ac_coach">Coach</label>
+                    <select id="ac_coach" required></select>
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="ac_start">Start Date</label>
+                    <input id="ac_start" type="date" required />
+                  </div>
+                </div>
+                <button type="submit">Assign</button>
+              </form>
+
+              <form class="sub-card role-admin role-coach" id="training_form">
+                <h3>Record Training Workload</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="t_athlete">Athlete</label>
+                    <select id="t_athlete" required></select>
+                  </div>
+                  <div>
+                    <label for="t_coach">Coach</label>
+                    <select id="t_coach" required></select>
+                  </div>
+                  <div>
+                    <label for="t_date">Session Date</label>
+                    <input id="t_date" type="date" required />
+                  </div>
+                  <div>
+                    <label for="t_duration">Duration (min)</label>
+                    <input id="t_duration" type="number" min="1" required />
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="t_intensity">Intensity (1-10)</label>
+                    <input
+                      id="t_intensity"
+                      type="number"
+                      min="1"
+                      max="10"
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="submit">Save Training Session</button>
+              </form>
+
+              <form class="sub-card role-admin role-coach" id="injury_form">
+                <h3>Record Injury Event</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="i_athlete">Athlete</label>
+                    <select id="i_athlete" required></select>
+                  </div>
+                  <div>
+                    <label for="i_severity">Severity</label>
+                    <select id="i_severity" required>
+                      <option>Low</option>
+                      <option>Moderate</option>
+                      <option>High</option>
+                      <option>Critical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="i_type">Injury Type</label>
+                    <input id="i_type" required />
+                  </div>
+                  <div>
+                    <label for="i_date">Injury Date</label>
+                    <input id="i_date" type="date" required />
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="i_desc">Description</label>
+                    <textarea id="i_desc" rows="2"></textarea>
+                  </div>
+                </div>
+                <button type="submit">Save Injury</button>
+              </form>
+
+              <form class="sub-card role-admin role-coach" id="recovery_form">
+                <h3>Record Recovery Metric</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="r_athlete">Athlete</label>
+                    <select id="r_athlete" required></select>
+                  </div>
+                  <div>
+                    <label for="r_date">Metric Date</label>
+                    <input id="r_date" type="date" required />
+                  </div>
+                  <div>
+                    <label for="r_fatigue">Fatigue</label>
+                    <input
+                      id="r_fatigue"
+                      type="number"
+                      min="1"
+                      max="10"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label for="r_soreness">Soreness</label>
+                    <input
+                      id="r_soreness"
+                      type="number"
+                      min="1"
+                      max="10"
+                      required
+                    />
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="r_sleep">Sleep Quality</label>
+                    <input
+                      id="r_sleep"
+                      type="number"
+                      min="1"
+                      max="10"
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="submit">Save Recovery Metric</button>
+              </form>
+
+              <form class="sub-card role-admin" id="physio_form">
+                <h3>Create Physiotherapist Record (Admin)</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="p_name">Name</label>
+                    <input id="p_name" required />
+                  </div>
+                  <div>
+                    <label for="p_spec">Specialization</label>
+                    <input id="p_spec" required />
+                  </div>
+                  <div>
+                    <label for="p_phone">Phone</label>
+                    <input id="p_phone" />
+                  </div>
+                  <div>
+                    <label for="p_email">Email</label>
+                    <input id="p_email" type="email" />
+                  </div>
+                </div>
+                <button type="submit">Save Physiotherapist</button>
+              </form>
+
+              <form
+                class="sub-card role-admin role-physio"
+                id="physio_session_form"
+              >
+                <h3>Record Physiotherapy Session</h3>
+                <div class="form-grid">
+                  <div>
+                    <label for="ps_injury">Injury</label>
+                    <select id="ps_injury" required></select>
+                  </div>
+                  <div>
+                    <label for="ps_physio">Physiotherapist</label>
+                    <select id="ps_physio" required></select>
+                  </div>
+                  <div>
+                    <label for="ps_date">Session Date</label>
+                    <input id="ps_date" type="date" required />
+                  </div>
+                  <div>
+                    <label for="ps_duration">Duration (min)</label>
+                    <input id="ps_duration" type="number" min="1" required />
+                  </div>
+                  <div class="form-grid-full">
+                    <label for="ps_treatment">Treatment Type</label>
+                    <input id="ps_treatment" required />
+                  </div>
+                </div>
+                <button type="submit">Save Physio Session</button>
+              </form>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel section timeline">
+          <h2>Cross-Department Unified Timeline</h2>
+          <p class="hint">
+            All critical events in one chronological feed for better
+            communication and decisions.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Athlete</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="timeline_rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const state = {
+        token: localStorage.getItem("auth_token") || "",
+        user: null,
+        athletes: [],
+        lookups: {
+          athletes: [],
+          coaches: [],
+          injuries: [],
+          physiotherapists: [],
+        },
+        selectedAthleteId: null,
+      };
+
+      function el(id) {
+        return document.getElementById(id);
+      }
+
+      function setStatus(message, type = "info") {
+        const box = el("status");
+        box.className = `status ${type}`;
+        box.textContent = message;
+      }
+
+      async function api(url, method = "GET", body, includeAuth = true) {
+        const headers = { "Content-Type": "application/json" };
+        if (includeAuth && state.token) {
+          headers.Authorization = `Bearer ${state.token}`;
+        }
+
+        const response = await fetch(url, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : undefined,
+        });
+
+        const payload = await response.json();
+        if (!payload.success) {
+          if (response.status === 401 && includeAuth) {
+            handleLogout("Session expired. Please login again.");
+          }
+          throw new Error(payload.error || "Request failed");
+        }
+
+        return payload.data;
+      }
+
+      function toNumber(value, fieldName) {
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) throw new Error(`Invalid ${fieldName}`);
+        return parsed;
+      }
+
+      function encodeQuery(params) {
+        const search = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (
+            value !== null &&
+            value !== undefined &&
+            String(value).trim() !== ""
+          ) {
+            search.set(key, value);
+          }
+        });
+        const query = search.toString();
+        return query ? `?${query}` : "";
+      }
+
+      function setSelectOptions(
+        selectId,
+        rows,
+        valueKey,
+        labelBuilder,
+        placeholder,
+      ) {
+        const select = el(selectId);
+        const placeholderOption = `<option value="">${placeholder}</option>`;
+        select.innerHTML =
+          placeholderOption +
+          rows
+            .map(
+              (row) =>
+                `<option value="${row[valueKey]}">${labelBuilder(row)}</option>`,
+            )
+            .join("");
+      }
+
+      function updateAuthUI() {
+        const loggedIn = Boolean(state.user && state.token);
+        el("auth_logged_out").classList.toggle("hidden", loggedIn);
+        el("auth_logged_in").classList.toggle("hidden", !loggedIn);
+        el("app_shell").classList.toggle("hidden", !loggedIn);
+
+        if (loggedIn) {
+          el("auth_user").textContent = state.user.name || state.user.username;
+          el("auth_role").textContent = state.user.role;
+          applyRoleAccess(state.user.role);
+        }
+      }
+
+      function applyRoleAccess(role) {
+        const roleRules = {
+          admin: ["admin", "coach", "physio"],
+          coach: ["coach"],
+          physio: ["physio"],
+        };
+
+        const enabled = roleRules[role] || [];
+        document.querySelectorAll("form.sub-card").forEach((form) => {
+          const needsAdmin = form.classList.contains("role-admin");
+          const needsCoach = form.classList.contains("role-coach");
+          const needsPhysio = form.classList.contains("role-physio");
+
+          let allowed = true;
+          if (needsAdmin && !enabled.includes("admin")) allowed = false;
+          if (
+            needsCoach &&
+            !(enabled.includes("coach") || enabled.includes("admin"))
+          )
+            allowed = false;
+          if (
+            needsPhysio &&
+            !(enabled.includes("physio") || enabled.includes("admin"))
+          )
+            allowed = false;
+
+          form
+            .querySelectorAll("input, select, textarea, button")
+            .forEach((node) => {
+              node.disabled = !allowed;
+            });
+        });
+      }
+
+      async function runAction(action, successMessage) {
+        try {
+          setStatus("Processing request...", "info");
+          await action();
+          await refreshAll();
+          if (state.selectedAthleteId) {
+            await loadAthleteProfile(state.selectedAthleteId);
+          }
+          setStatus(successMessage, "success");
+        } catch (error) {
+          setStatus(error.message || String(error), "error");
+        }
+      }
+
+      function renderKpis(summary, insights) {
+        const cards = [
+          ["Athletes", summary.athletes],
+          ["Coaches", summary.coaches],
+          ["Training Sessions", summary.training_sessions],
+          ["Injuries", summary.injuries],
+          ["Recovery Metrics", summary.recovery_metrics],
+          ["Physio Sessions", summary.physio_sessions],
+          ["Active Injuries (30d)", insights.active_injuries_30d],
+          ["Avg Weekly Workload", insights.avg_weekly_workload],
+          ["Open Care Cases", insights.open_care_cases],
+          ["Physio Sessions (7d)", insights.physio_sessions_7d],
+        ];
+
+        el("kpis").innerHTML = cards
+          .map(
+            ([label, value]) =>
+              `<div class="kpi"><div class="label">${label}</div><strong>${value}</strong></div>`,
+          )
+          .join("");
+      }
+
+      function renderAthleteRows() {
+        const body = el("athlete_rows");
+        if (!state.athletes.length) {
+          body.innerHTML =
+            '<tr><td colspan="4" class="muted">No athletes found.</td></tr>';
+          return;
+        }
+
+        body.innerHTML = state.athletes
+          .map((athlete) => {
+            const active =
+              Number(athlete.athlete_id) === Number(state.selectedAthleteId);
+            return `<tr class="${active ? "active-row" : ""}" data-athlete-id="${athlete.athlete_id}">
+              <td>${athlete.athlete_id}</td>
+              <td>${athlete.name}</td>
+              <td>${athlete.sport}</td>
+              <td>${athlete.age ?? "-"}</td>
+            </tr>`;
+          })
+          .join("");
+
+        body.querySelectorAll("tr[data-athlete-id]").forEach((row) => {
+          row.addEventListener("click", async () => {
+            const athleteId = Number(row.getAttribute("data-athlete-id"));
+            state.selectedAthleteId = athleteId;
+            renderAthleteRows();
+            await loadAthleteProfile(athleteId);
+          });
+        });
+      }
+
+      function renderWorkloadBars(workloadRows) {
+        const container = el("workload_bars");
+        if (!workloadRows || !workloadRows.length) {
+          container.innerHTML =
+            '<div class="muted">No workload records in the last 60 days.</div>';
+          return;
+        }
+
+        const maxLoad = Math.max(
+          ...workloadRows.map((row) => Number(row.load_score || 0)),
+          1,
+        );
+        container.innerHTML = workloadRows
+          .map((row) => {
+            const load = Number(row.load_score || 0);
+            const width = Math.max(4, Math.round((load / maxLoad) * 100));
+            return `<div class="bar-row">
+              <span>${row.session_date}</span>
+              <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+              <strong>${load}</strong>
+            </div>`;
+          })
+          .join("");
+      }
+
+      function renderCareLinks(injuries, athleteName) {
+        const body = el("care_link_rows");
+        if (!injuries || !injuries.length) {
+          body.innerHTML = `<tr><td colspan="4" class="muted">No injury history for ${athleteName}. Add an injury record to start care linkage.</td></tr>`;
+          return;
+        }
+
+        body.innerHTML = injuries
+          .map((injury) => {
+            const sessions = injury.physiotherapy_sessions || [];
+            const details = sessions.length
+              ? sessions
+                  .map(
+                    (s) =>
+                      `${s.session_date}: ${s.treatment_type} (${s.physio_name})`,
+                  )
+                  .join("<br />")
+              : '<span class="muted">No linked physio session</span>';
+            return `<tr>
+              <td>${injury.injury_type}</td>
+              <td>${injury.injury_date}</td>
+              <td>${injury.severity}</td>
+              <td>${details}</td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      function renderRecoveryRows(rows) {
+        const body = el("recovery_rows");
+        if (!rows || !rows.length) {
+          body.innerHTML =
+            '<tr><td colspan="4" class="muted">No recovery records available.</td></tr>';
+          return;
+        }
+
+        body.innerHTML = rows
+          .map(
+            (row) =>
+              `<tr><td>${row.metric_date}</td><td>${row.fatigue_level}</td><td>${row.muscle_soreness}</td><td>${row.sleep_quality}</td></tr>`,
+          )
+          .join("");
+      }
+
+      function renderTimeline(rows) {
+        const body = el("timeline_rows");
+        if (!rows.length) {
+          body.innerHTML =
+            '<tr><td colspan="4" class="muted">No timeline events found.</td></tr>';
+          return;
+        }
+
+        body.innerHTML = rows
+          .map(
+            (row) =>
+              `<tr><td>${row.event_date}</td><td>${row.event_type}</td><td>${row.athlete_name}</td><td>${row.details}</td></tr>`,
+          )
+          .join("");
+      }
+
+      async function loadAthletes() {
+        const query = encodeQuery({
+          search: el("search").value,
+          sport: el("sport_filter").value,
+          gender: el("gender_filter").value,
+        });
+
+        state.athletes = await api(`/api/athletes${query}`);
+        renderAthleteRows();
+      }
+
+      async function loadLookups() {
+        state.lookups = await api("/api/lookups");
+
+        const sports = [
+          ...new Set(
+            (state.lookups.athletes || [])
+              .map((row) => row.sport)
+              .filter(Boolean),
+          ),
+        ].sort();
+        const sportFilter = el("sport_filter");
+        const selected = sportFilter.value;
+        sportFilter.innerHTML =
+          '<option value="">All</option>' +
+          sports
+            .map((sport) => `<option value="${sport}">${sport}</option>`)
+            .join("");
+        sportFilter.value = selected;
+
+        setSelectOptions(
+          "ac_athlete",
+          state.lookups.athletes,
+          "athlete_id",
+          (row) => `#${row.athlete_id} - ${row.name}`,
+          "Select athlete",
+        );
+        setSelectOptions(
+          "t_athlete",
+          state.lookups.athletes,
+          "athlete_id",
+          (row) => `#${row.athlete_id} - ${row.name}`,
+          "Select athlete",
+        );
+        setSelectOptions(
+          "i_athlete",
+          state.lookups.athletes,
+          "athlete_id",
+          (row) => `#${row.athlete_id} - ${row.name}`,
+          "Select athlete",
+        );
+        setSelectOptions(
+          "r_athlete",
+          state.lookups.athletes,
+          "athlete_id",
+          (row) => `#${row.athlete_id} - ${row.name}`,
+          "Select athlete",
+        );
+
+        setSelectOptions(
+          "ac_coach",
+          state.lookups.coaches,
+          "coach_id",
+          (row) => `#${row.coach_id} - ${row.name}`,
+          "Select coach",
+        );
+        setSelectOptions(
+          "t_coach",
+          state.lookups.coaches,
+          "coach_id",
+          (row) => `#${row.coach_id} - ${row.name}`,
+          "Select coach",
+        );
+
+        setSelectOptions(
+          "ps_injury",
+          state.lookups.injuries,
+          "injury_id",
+          (row) =>
+            `#${row.injury_id} - ${row.injury_type} (${row.athlete_name})`,
+          "Select injury",
+        );
+        setSelectOptions(
+          "ps_physio",
+          state.lookups.physiotherapists,
+          "physio_id",
+          (row) => `#${row.physio_id} - ${row.name}`,
+          "Select physiotherapist",
+        );
+      }
+
+      async function loadAthleteProfile(athleteId) {
+        if (!athleteId) return;
+
+        const [profile, risk] = await Promise.all([
+          api(`/api/athletes/${athleteId}/profile`),
+          api(`/api/athletes/${athleteId}/risk`),
+        ]);
+
+        const athlete = profile.athlete;
+        const coaches = profile.coaches || [];
+        const coachHtml = coaches.length
+          ? `<ul class="meta-list">${coaches.map((c) => `<li>${c.name} (${c.sport}) since ${c.start_date}</li>`).join("")}</ul>`
+          : '<div class="muted">No coach assignment yet.</div>';
+
+        el("athlete_meta").innerHTML = `
+          <strong>#${athlete.athlete_id} - ${athlete.name}</strong><br />
+          Sport: ${athlete.sport} | Gender: ${athlete.gender} | Age: ${athlete.age ?? "-"}<br />
+          Enrollment: ${athlete.enrollment_date}
+          <div style="margin-top:8px"><strong>Coach Mapping</strong>${coachHtml}</div>
+        `;
+
+        renderWorkloadBars(profile.workload || []);
+        renderCareLinks(profile.injuries || [], athlete.name);
+        renderRecoveryRows(profile.recovery || []);
+
+        const riskLevel = String(risk.risk_level || "Low").toLowerCase();
+        const riskClass =
+          riskLevel === "high"
+            ? "risk-high"
+            : riskLevel === "moderate"
+              ? "risk-moderate"
+              : "risk-low";
+        const chip = el("risk_chip");
+        chip.className = `risk-chip ${riskClass}`;
+        chip.textContent = `${risk.risk_level} Risk (Score ${risk.risk_score})`;
+
+        el("risk_meta").textContent =
+          `Workload: ${risk.weekly_workload}, Fatigue: ${risk.avg_fatigue}, Soreness: ${risk.avg_soreness}, Sleep: ${risk.avg_sleep}, Active injuries (30d): ${risk.active_injuries_30d}`;
+      }
+
+      async function loadTimeline() {
+        const rows = await api("/api/dashboard/timeline");
+        renderTimeline(rows);
+      }
+
+      async function refreshAll() {
+        const [summary, insights] = await Promise.all([
+          api("/api/dashboard/summary"),
+          api("/api/dashboard/insights"),
+        ]);
+        renderKpis(summary, insights);
+        await loadLookups();
+        await loadAthletes();
+        await loadTimeline();
+      }
+
+      function pickInitialAthlete() {
+        const injuryAthleteIds = new Set(
+          (state.lookups.injuries || []).map((row) =>
+            Number(row.athlete_id_fk),
+          ),
+        );
+        const injured = state.athletes.find((athlete) =>
+          injuryAthleteIds.has(Number(athlete.athlete_id)),
+        );
+        return injured
+          ? Number(injured.athlete_id)
+          : state.athletes[0]
+            ? Number(state.athletes[0].athlete_id)
+            : null;
+      }
+
+      async function bootstrapAppData() {
+        await refreshAll();
+        if (state.athletes.length) {
+          state.selectedAthleteId = pickInitialAthlete();
+          renderAthleteRows();
+          await loadAthleteProfile(state.selectedAthleteId);
+        }
+      }
+
+      async function login() {
+        const username = el("login_username").value.trim();
+        const password = el("login_password").value;
+        if (!username || !password) {
+          setStatus("Username and password are required.", "error");
+          return;
+        }
+
+        try {
+          setStatus("Authenticating...", "info");
+          const data = await api(
+            "/api/auth/login",
+            "POST",
+            { username, password },
+            false,
+          );
+          state.token = data.token;
+          localStorage.setItem("auth_token", state.token);
+          state.user = data.user;
+          updateAuthUI();
+          await bootstrapAppData();
+          setStatus(`Welcome ${state.user.name}.`, "success");
+        } catch (error) {
+          setStatus(error.message || String(error), "error");
+        }
+      }
+
+      function handleLogout(message = "Logged out.") {
+        state.token = "";
+        state.user = null;
+        state.athletes = [];
+        state.lookups = {
+          athletes: [],
+          coaches: [],
+          injuries: [],
+          physiotherapists: [],
+        };
+        state.selectedAthleteId = null;
+        localStorage.removeItem("auth_token");
+        updateAuthUI();
+        setStatus(message, "info");
+      }
+
+      async function tryRestoreSession() {
+        if (!state.token) {
+          updateAuthUI();
+          return;
+        }
+
+        try {
+          const data = await api("/api/auth/me");
+          state.user = data.user;
+          updateAuthUI();
+          await bootstrapAppData();
+          setStatus(`Welcome back ${state.user.name}.`, "success");
+        } catch (error) {
+          handleLogout("Session expired. Please login again.");
+        }
+      }
+
+      function wireFilters() {
+        el("refresh_btn").addEventListener("click", async () => {
+          try {
+            setStatus("Refreshing records...", "info");
+            await refreshAll();
+            if (state.selectedAthleteId) {
+              await loadAthleteProfile(state.selectedAthleteId);
+            }
+            setStatus("Dashboard refreshed.", "success");
+          } catch (error) {
+            setStatus(error.message || String(error), "error");
+          }
+        });
+
+        ["search", "sport_filter", "gender_filter"].forEach((id) => {
+          el(id).addEventListener("change", async () => {
+            try {
+              await loadAthletes();
+            } catch (error) {
+              setStatus(error.message || String(error), "error");
+            }
+          });
+        });
+      }
+
+      function wireForms() {
+        el("athlete_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/athletes", "POST", {
+                name: el("a_name").value,
+                dob: el("a_dob").value,
+                gender: el("a_gender").value,
+                sport: el("a_sport").value,
+                enrollment_date: el("a_enroll").value,
+              }),
+            "Athlete record saved.",
+          );
+        });
+
+        el("coach_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/coaches", "POST", {
+                name: el("c_name").value,
+                sport: el("c_sport").value,
+                phone: el("c_phone").value,
+                email: el("c_email").value,
+              }),
+            "Coach record saved.",
+          );
+        });
+
+        el("assign_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/athlete-coaches", "POST", {
+                athlete_id_fk: toNumber(el("ac_athlete").value, "athlete"),
+                coach_id_fk: toNumber(el("ac_coach").value, "coach"),
+                start_date: el("ac_start").value,
+              }),
+            "Athlete-coach mapping saved.",
+          );
+        });
+
+        el("training_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/training-sessions", "POST", {
+                session_date: el("t_date").value,
+                duration_minutes: toNumber(el("t_duration").value, "duration"),
+                load_intensity: toNumber(el("t_intensity").value, "intensity"),
+                athlete_id_fk: toNumber(el("t_athlete").value, "athlete"),
+                coach_id_fk: toNumber(el("t_coach").value, "coach"),
+              }),
+            "Training workload saved.",
+          );
+        });
+
+        el("injury_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/injuries", "POST", {
+                injury_type: el("i_type").value,
+                severity: el("i_severity").value,
+                injury_date: el("i_date").value,
+                description: el("i_desc").value,
+                athlete_id_fk: toNumber(el("i_athlete").value, "athlete"),
+              }),
+            "Injury event saved.",
+          );
+        });
+
+        el("recovery_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/recovery-metrics", "POST", {
+                metric_date: el("r_date").value,
+                fatigue_level: toNumber(el("r_fatigue").value, "fatigue"),
+                muscle_soreness: toNumber(el("r_soreness").value, "soreness"),
+                sleep_quality: toNumber(el("r_sleep").value, "sleep"),
+                athlete_id_fk: toNumber(el("r_athlete").value, "athlete"),
+              }),
+            "Recovery metric saved.",
+          );
+        });
+
+        el("physio_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/physiotherapists", "POST", {
+                name: el("p_name").value,
+                specialization: el("p_spec").value,
+                phone: el("p_phone").value,
+                email: el("p_email").value,
+              }),
+            "Physiotherapist saved.",
+          );
+        });
+
+        el("physio_session_form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          runAction(
+            () =>
+              api("/api/physio-sessions", "POST", {
+                session_date: el("ps_date").value,
+                treatment_type: el("ps_treatment").value,
+                duration: toNumber(el("ps_duration").value, "duration"),
+                injury_id_fk: toNumber(el("ps_injury").value, "injury"),
+                physio_id_fk: toNumber(el("ps_physio").value, "physio"),
+              }),
+            "Physiotherapy session linked successfully.",
+          );
+        });
+      }
+
+      function wireAuth() {
+        el("login_btn").addEventListener("click", login);
+        el("logout_btn").addEventListener("click", () => handleLogout());
+        el("login_password").addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            login();
+          }
+        });
+      }
+
+      wireAuth();
+      wireFilters();
+      wireForms();
+      tryRestoreSession();
+    </script>
+  </body>
+</html>

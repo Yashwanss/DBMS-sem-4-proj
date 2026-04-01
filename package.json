@@ -1,0 +1,25 @@
+{
+  "name": "athlete-load-injury-risk-tracker",
+  "version": "1.0.0",
+  "description": "Athlete Load & Injury Risk Tracking System (DA1 project)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "dbms",
+    "athlete",
+    "injury",
+    "tracking"
+  ],
+  "author": "Yashwanth K",
+  "license": "MIT",
+  "dependencies": {
+    "oracledb": "^6.8.0",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
